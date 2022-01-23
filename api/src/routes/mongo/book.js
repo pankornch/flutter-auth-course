@@ -1,23 +1,13 @@
 import express from "express"
-import authMiddleware from "../middlewares/auth"
-import Book from "../model/Book"
-import { Op } from "sequelize"
-import User from "../model/User"
+import Book from "../../model/mongo/Book"
 const router = express.Router()
-
-Book.belongsTo(User, {
-	foreignKey: "author_id",
-	as: "author"
-})
-
-router.use(authMiddleware)
 
 router.post("/create_book", async (req, res) => {
 	const { body } = req
 
 	const book = await Book.create({
 		title: body.title,
-		author_id: req.user.id,
+		author_id: body.author_id,
 	})
 
 	res.send({
@@ -28,42 +18,31 @@ router.post("/create_book", async (req, res) => {
 
 router.get("/books", async (req, res) => {
 	if (req.query.id) {
-		const book = await Book.findAll({
-			where: {
-				id: req.query.id,
-			},
+		const book = await Book.find({
+			_id: req.query.id,
 		})
 		res.send(book)
 	} else {
-		const books = await Book.findAll({
-			include: {
-				model: User,
-				as: "author"
-			},
-		})
+		const books = await Book.find()
 		res.send(books)
 	}
 })
 
 router.get("/books/:id", async (req, res) => {
-	const book = await Book.findByPk(req.params.id)
+	const book = await Book.findById(req.params.id)
 	res.send(book)
 })
 
 router.patch("/update_book/:id", async (req, res) => {
 	const { body, params } = req
-	const result = await Book.update(
+	const result = await Book.updateOne(
+		{ _id: params.id },
 		{
-			title: body.title,
-		},
-		{
-			where: {
-				[Op.and]: [{ id: params.id }, { author_id: req.user.id }],
-			},
+			$set: { title: body.title },
 		}
 	)
 
-	if (!result[0]) {
+	if (!result.matchedCount) {
 		return res.send({
 			status: "error",
 			message: "book cannot found",
@@ -78,13 +57,8 @@ router.patch("/update_book/:id", async (req, res) => {
 
 router.delete("/delete_book/:id", async (req, res) => {
 	const { params } = req
-	const result = await Book.destroy({
-		where: {
-			[Op.and]: [{ id: params.id }, { author_id: req.user.id }],
-		},
-	})
-
-	if (!result) {
+	const result = await Book.deleteOne({ _id: params.id })
+	if (!result.deletedCount) {
 		return res.send({
 			status: "error",
 			message: "book cannot found",

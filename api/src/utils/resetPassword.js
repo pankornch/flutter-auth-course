@@ -22,7 +22,7 @@ async function resetPassword({ email }) {
 	const code = restCode()
 
 	await transporter.sendMail({
-		from: '"Sendmail Test" <up.send.mail.test@gmail.com>', // sender address
+		from: '"Sendmail Test" <test@mail.com>', // sender address
 		to: email, // list of receivers
 		subject: "Reset Password from SendMail Test", // Subject line
 		text: `your reset password code is: ${code} or link: http://google.com`, // plain text body

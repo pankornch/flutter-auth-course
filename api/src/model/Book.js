@@ -7,7 +7,7 @@ const Book = sequelize.define("books", {
 		allowNull: false,
 	},
 	author_id: {
-		type: DataTypes.STRING,
+		type: DataTypes.INTEGER,
 		allowNull: false,
 	},
 })
