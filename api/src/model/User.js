@@ -15,6 +15,12 @@ const User = sequelize.define("users", {
 		type: DataTypes.INTEGER,
 		allowNull: false,
 	},
+	resetPasswordCode: {
+		type: DataTypes.INTEGER,
+	},
+	resetCodeExpiredIn: {
+		type: DataTypes.BIGINT,
+	},
 })
 
 export default User

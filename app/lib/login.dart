@@ -17,6 +17,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  final resetCodeController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  bool isSend = false;
 
   submit() async {
     final res = await http.post(
@@ -56,6 +59,25 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  forgotPassword() async {
+    await http.get(
+      Uri.parse("$url/auth/reset_password?email=${usernameController.text}"),
+    );
+    setState(() {
+      isSend = true;
+    });
+  }
+
+  sendResetPassword() async {
+    await http.post(
+      Uri.parse(
+          "$url/auth/reset_password?email=${usernameController.text}&code=${resetCodeController.text}&newPassword=${newPasswordController.text}"),
+    );
+    setState(() {
+      isSend = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,15 +95,41 @@ class _LoginScreenState extends State<LoginScreen> {
               controller: passwordController,
               obscureText: true,
             ),
-            TextButton(onPressed: submit, child: Text("Login")),
             TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegisterScreen()),
-                  );
-                },
-                child: Text("Register"))
+              onPressed: submit,
+              child: Text("Login"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisterScreen()),
+                );
+              },
+              child: Text("Register"),
+            ),
+            TextButton(
+              onPressed: forgotPassword,
+              child: Text("Forgot password"),
+            ),
+            isSend
+                ? Column(
+                    children: [
+                      TextField(
+                        controller: resetCodeController,
+                        decoration: InputDecoration(labelText: "Reset code"),
+                      ),
+                      TextField(
+                        controller: newPasswordController,
+                        decoration: InputDecoration(labelText: "New password"),
+                      ),
+                      TextButton(
+                        onPressed: sendResetPassword,
+                        child: Text("send"),
+                      ),
+                    ],
+                  )
+                : SizedBox()
           ],
         ),
       ),

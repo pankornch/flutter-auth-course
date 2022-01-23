@@ -6,6 +6,7 @@ lib
 - bcryptjs -> hash password
 - esm ECMAScript
 - cors Alllow origin
+- dotenv Environtment variables
 
 todo
 [x] CURD book
